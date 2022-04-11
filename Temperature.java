@@ -49,21 +49,3 @@ class Temperature{
 
 
 }// Temperature class
-
-
-/**************** cheating and putting in same file *******************/
-/** remember to get the import java util line if you break this into 2 files */ 
-
-
-class TempTestDriver{
-   public static void main(String argv[]){
-      Scanner keyb = new Scanner (System.in);
-      
-      System.out.println("What is the temp in Farenheit?");
-      double ftemp = keyb.nextDouble(); 
-      Temperature t1 = new Temperature(ftemp);
-     
-      System.out.println("that's " + t1.getKelvin() + " K"); 
-   
-   }
-}

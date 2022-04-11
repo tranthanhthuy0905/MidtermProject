@@ -43,14 +43,17 @@ def parser(inputVal):
     # Check Declarations
     check_declaration = baseDeclarationParser(check_conditions)
 
+    # Check Constructor
+    check_constructor = baseConstructorParser(check_declaration)
+    
     # Check Statements
-    check_statement = baseStatementParser(check_declaration)
+    check_statement = baseStatementParser(check_constructor)
 
     # # Check Selection, Loop
     check_selectionLoop = baseSelectionLoopParser(check_statement)
 
     # Check program
-    #return(check_expression)
+    #return(check_comment)
     return(baseProgramParser(check_selectionLoop))
 
 
@@ -67,15 +70,16 @@ def testFile(inputFile):
 def main():
     '''Test C-level'''
     # print("Parsing C-level: ")
-    # print(parser(testFile("testC.java")))
+    print(parser(testFile("testC.java")))
 
-    # '''Test B-level'''
-    # print("Parsing B-level: ")
-    # print(parser(testFile("testB.java")))
+    '''Test B-level'''
+    #print("Parsing B-level: ")
+    print(parser(testFile("testB.java")))
 
-    # '''Test A-level'''
-    # print("Parsing A-level: ")
-    # # I do not know how to check the parentheses
+    '''Test A-level'''
+    #print("Parsing A-level: ")
+    print(parser(testFile("testA.java")))
+    
     print(parser(testFile("ExtraCredit.java")))
 
     '''Test Extra'''

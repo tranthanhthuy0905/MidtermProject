@@ -1,1 +1,1 @@
-check_arithmetic
+check_terms

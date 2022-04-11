@@ -4,13 +4,14 @@ import re
 def baseObjectParser(inputVal):
     return re.sub("([A-Z][a-zA-Z0-9_]*)", "_OB", inputVal)
 
+
 def baseClassParser(inputVal):
     # IM::= import (.+)
     import_pattern = "(import (.+))"
     # CL::= class [A-Z][a-zA-Z_]*
     class_pattern = "(class _OB)"
     # ME::= public static void main\(String argv\[\]\) (throws Exception)?
-    main_pattern = "(public static void main\(_OB argv\[\]\)( throws Exception)?)"
+    main_pattern = "(public static void main\(_OB argv\[\]\)( throws _OB)?)"
 
     # Check import
     check_import = re.sub(import_pattern, "IM", inputVal)
@@ -19,23 +20,25 @@ def baseClassParser(inputVal):
     check_method = re.sub(main_pattern, "ME", check_class)
     return check_method
 
+
 def baseConstructorParser(inputVal):
-    return re.sub(r'DT\((DTX(\,DTX)*)?\)\{(S)+\}', "_CTT", inputVal)
+    return re.sub(r'DT\((DTX(\,DTX)*)?\)\{(S)+\}', "_CTT", baseStatementParser(inputVal))
+
 
 def baseStatementParser(inputVal):
     # S::= (X=E)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)
-    statement_pattern = "((X=[XNVE];)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)|(_CMT))"
+    statement_pattern = "((X=[XNVE];)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)|(_CMT)|(_CTT))"
     return re.sub(statement_pattern, "S", inputVal)
 
 
 def baseProgramParser(inputVal):
     # P::= IMCL\{ME\{(S)+\}\}
-    program_pattern = "(IMCL\{(S|(M\{(S)+\}))*ME\{(S|(M\{(S)+\}))+\}(S|(M\{(S)+\}))*\})"
+    program_pattern = "(IMCL\{(S|(M\{(S)+\}))*(ME\{(S|(M\{(S)+\}))+\})?(S|(M\{(S)+\}))*\}(S)*)"
     return re.sub(program_pattern, "P", baseStatementParser(inputVal))
 
 
 def baseCommentParser(input):
-    comment_pattern = "(\/\/).+|(\/\*[\s\S]*?\*\/)"
+    comment_pattern = "(\/\/).+|(\/\*[\s\S]*?\*\/)|\/\*.*(IM|CL)"
     return re.sub(comment_pattern, "_CMT", input)
 
 
@@ -45,7 +48,7 @@ def baseSpecialityParser(inputVal):
     check_new = re.sub(_NEW, "_NEW", inputVal)
 
     # Return
-    _RE = "return[ ]+"
+    _RE = "return[ ]*"
     check_return = re.sub(_RE, "_RETURN", check_new)
 
     # System
@@ -81,8 +84,8 @@ def baseSpecialityParser(inputVal):
 
     # Function
     function_pattern = "(((public static)|(public)|(static))[ ]+DT)"
-    check_function = re.sub(function_pattern, "F", check_datatype)
-    
+    check_function = re.sub(function_pattern, "DT", check_datatype)
+
     return check_function
 
 
@@ -102,7 +105,7 @@ def baseArithmeticParser(inputVal):
 
 
 def baseExpressionParser(inputVal):
-    expression_pattern = "[XVN](AOp\(*[XVN]\)*)+"
+    expression_pattern = "[XVN](AOp\(*[XVN]\)*)+|(X\(X\)N)|\([XVN]+\)(AOp[XNV])*"
     return re.sub(expression_pattern, "E", inputVal)
 
 
@@ -116,7 +119,7 @@ def baseOutputParser(inputVal):
 def baseDeclarationParser(inputVal):
     # Handle balanced parentheses
     # findParentheses = re.findall()
-    declaration_pattern = "((DTX(,X)*;)|(DTX=(X\(X\));)|(DTX=X.X\(\);)|(DTX(,X)*=([NVBE](AOp[NVBE])*)\;)|(DTX(,X)*=[NVB];))"
+    declaration_pattern = "((DTX(,X)*;)|(DTX=(X\(X\));)|(DTX=X.X\(\);)|(DTX(,X)*=((XE)+)\;)|(DTX(,X)*=([NVBE](AOp[NVBE])*)\;)|(DTX(,X)*=[NVB];))"
     return re.sub(declaration_pattern, "DE", inputVal)
 
 
@@ -126,7 +129,7 @@ def baseScannerParser(inputVal):
 
 
 def baseMethodParser(inputVal):
-    method_pattern = "FX\(DTX(,DTX)*\)"
+    method_pattern = "DTX\((DTX(,DTX)*)?\)"
     return re.sub(method_pattern, "M", inputVal)
 
 
