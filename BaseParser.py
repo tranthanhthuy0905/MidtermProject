@@ -2,15 +2,16 @@ import re
 
 
 def baseObjectParser(inputVal):
+    # _OB::=([A-Z][a-zA-Z0-9_]*)
     return re.sub("([A-Z][a-zA-Z0-9_]*)", "_OB", inputVal)
 
 
 def baseClassParser(inputVal):
     # IM::= import (.+)
     import_pattern = "(import (.+))"
-    # CL::= class [A-Z][a-zA-Z_]*
+    # CL::= (class _OB)
     class_pattern = "(class _OB)"
-    # ME::= public static void main\(String argv\[\]\) (throws Exception)?
+    # ME::= (public static void main\(_OB argv\[\]\)( throws _OB)?)
     main_pattern = "(public static void main\(_OB argv\[\]\)( throws _OB)?)"
 
     # Check import
@@ -22,32 +23,34 @@ def baseClassParser(inputVal):
 
 
 def baseConstructorParser(inputVal):
+    # _CTT::= DT\((DTX(\,DTX)*)?\)\{(S)+\}
     return re.sub(r'DT\((DTX(\,DTX)*)?\)\{(S)+\}', "_CTT", baseStatementParser(inputVal))
 
 
 def baseStatementParser(inputVal):
-    # S::= (X=E)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)
+    # S::= (X=[XNVE];)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)|(_CMT)|(_CTT)
     statement_pattern = "((X=[XNVE];)|(LOOP)|(SELECT)|(DE)+|(OT)+|(_SCAN)+|(_RE)|(_CMT)|(_CTT))"
     return re.sub(statement_pattern, "S", inputVal)
 
 
 def baseProgramParser(inputVal):
-    # P::= IMCL\{ME\{(S)+\}\}
+    # P::= IMCL\{(S|(M\{(S)+\}))*(ME\{(S|(M\{(S)+\}))+\})?(S|(M\{(S)+\}))*\}(S)*
     program_pattern = "(IMCL\{(S|(M\{(S)+\}))*(ME\{(S|(M\{(S)+\}))+\})?(S|(M\{(S)+\}))*\}(S)*)"
     return re.sub(program_pattern, "P", baseStatementParser(inputVal))
 
 
 def baseCommentParser(input):
+    # _CMT ::= (\/\/).+|(\/\*[\s\S]*?\*\/)|\/\*.*(IM|CL)
     comment_pattern = "(\/\/).+|(\/\*[\s\S]*?\*\/)|\/\*.*(IM|CL)"
     return re.sub(comment_pattern, "_CMT", input)
 
 
 def baseSpecialityParser(inputVal):
-    # Scanners
+    # _NEW ::= new( )+
     _NEW = "new( )+"
     check_new = re.sub(_NEW, "_NEW", inputVal)
 
-    # Return
+    #_RETURN ::= return[ ]*
     _RE = "return[ ]*"
     check_return = re.sub(_RE, "_RETURN", check_new)
 
@@ -90,7 +93,9 @@ def baseSpecialityParser(inputVal):
 
 
 def baseTermsParser(inputVal):
+    # X::= [a-z]{1}[a-zA-Z0-9_]*
     identifier_pattern = "[a-z]{1}[a-zA-Z0-9_]*"
+    # N::= [+-]?([0-9]*[.]?)[0-9]+
     number_pattern = "[+-]?([0-9]*[.]?)[0-9]+"
 
     check_identifier = re.sub(identifier_pattern, "X", inputVal)
@@ -100,11 +105,13 @@ def baseTermsParser(inputVal):
 
 
 def baseArithmeticParser(inputVal):
+    # AOp ::= [+\-*/]
     arithmetic_pattern = "[+\-*/]"
     return re.sub(arithmetic_pattern, "AOp", inputVal)
 
 
 def baseExpressionParser(inputVal):
+    # E::= [XVN](AOp\(*[XVN]\)*)+|(X\(X\)N)|\([XVN]+\)(AOp[XNV])*
     expression_pattern = "[XVN](AOp\(*[XVN]\)*)+|(X\(X\)N)|\([XVN]+\)(AOp[XNV])*"
     return re.sub(expression_pattern, "E", inputVal)
 
@@ -117,8 +124,7 @@ def baseOutputParser(inputVal):
 
 
 def baseDeclarationParser(inputVal):
-    # Handle balanced parentheses
-    # findParentheses = re.findall()
+    
     declaration_pattern = "((DTX(,X)*;)|(DTX=(X\(X\));)|(DTX=X.X\(\);)|(DTX(,X)*=((XE)+)\;)|(DTX(,X)*=([NVBE](AOp[NVBE])*)\;)|(DTX(,X)*=[NVB];))"
     return re.sub(declaration_pattern, "DE", inputVal)
 

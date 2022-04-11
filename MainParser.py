@@ -79,10 +79,9 @@ def main():
     '''Test A-level'''
     #print("Parsing A-level: ")
     print(parser(testFile("testA.java")))
-    
-    print(parser(testFile("ExtraCredit.java")))
 
     '''Test Extra'''
     #print("Parsing A-level: ")
+    print(parser(testFile("ExtraCredit.java")))
     print(parser(testFile("Temperature.java")))
 main()
